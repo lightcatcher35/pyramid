@@ -11,3 +11,6 @@
 https://github.com/gmag11/WifiLocation
 
 https://www.hackster.io/mjrobot/iot-made-easy-w-uno-esp-01-thingspeak-mit-app-inventor-da6a50
+
+
+https://openweathermap.org/current
