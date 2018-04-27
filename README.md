@@ -3,6 +3,19 @@
 
 <h1>Akıllı ev arduino projesi</h1>
 
+<b>nem & sıcaklık</b>
+
+Bebekler için sıcaklık; gündüz 20-24C, gece 1-2 derece daha düşük
+Bebekler için nem; %40 - %60 arası
+
+yetişkinler için yazın; 20C 
+insan sağlığı için sıcaklık 20-25C 
+yetişkinler için nem; %45 - %60
+
+klima değerleri; yazın, 20-21C kışın, 27-28C
+burun, sinüzit ve akciğer hastaları uzun süre klimalı ortamda kalmamalı
+
+bir insanın 1 yılda maruz kalacağı radyasyon miktarı 100 milisieverttir. fazlası kansere yol açar.
 
 
 
