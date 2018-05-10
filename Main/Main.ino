@@ -14,11 +14,17 @@ const int buttonPin3 = 41;
 
 dht11 DHT11; // DHT11 nesnesi oluşturuluyor
 float sicaklik,nem=0;
+float sicaklikGuncel=0;
 int mode=0;
+int loopCount=0;
 
-float ortSicakliklar[]={0,8.7,9.5,11.6,15.8,20.7,25.5,28.0,27.6,23.6,18.7,14.0,10.4};
-float dusukSicakliklar[]={0,5.7,6.1,7.5,11.0,15.3,19.7,22.3,22.2,18.5,14.5,10.6,7.5,13.4 };
-float yuksekSicakliklar[]={0,12.3,13.5,16.1,20.8,26.0,30.6,33.1,32.9,29.1,23.9,18.4,14.0,22.6};
+float ortSicakliklar[]={0,8.7,9.5,11.6,15.8,22.7,25.5,28.0,27.6,23.6,18.7,14.0,10.4};
+float dusukSicakliklar[]={0,5.7,6.1,7.5,11.0,17.3,19.7,22.3,22.2,18.5,14.5,10.6,7.5,13.4 };
+float yuksekSicakliklar[]={0,12.3,13.5,16.1,20.8,28.0,30.6,33.1,32.9,29.1,23.9,18.4,14.0,22.6};
+
+String aylar[]={"","Ocak","Subat","Mart","Nisan","Mayis","Haziran","Temmuz","Agustos","Eylul","Ekim","Kasim","Aralik"};
+
+
 void lcdClear()
 {
   lcd.setCursor(0, 0); 
@@ -50,7 +56,49 @@ void lcd2Print(String text1,String text2="                 ")
   lcd2.setCursor(0, 1); 
   lcd2.print(String(text2));
 }
+float sicaklikHesapla(int ay,int saat)
+{
+  float sicaklikY=0;
+  Serial.print(saat);
+  Serial.print("/");
+  Serial.print(ay);
+  Serial.println("/");
+  if(saat==14)
+  {
+    sicaklikY=yuksekSicakliklar[ay];
+  } 
+   else if(saat==4)
+  {
+    sicaklikY=dusukSicakliklar[ay];
+  } else if(saat>4 && saat<14)
+  {
+    float fark=yuksekSicakliklar[ay]-dusukSicakliklar[ay];
+    int saatFark=(saat-4);
+    
+    //Serial.println("////Fark "+String((fark/9)));
+    sicaklikY=dusukSicakliklar[ay]+((fark/9)*saatFark);
+    //Serial.println("////////////"+String(sicaklikY));
+  }else
+  {
+    
+    float fark=yuksekSicakliklar[ay]-dusukSicakliklar[ay];
+    int saatYed=saat;
+    //Serial.println("////Saat 1  "+String(saatYed));
+    if(saatYed<4) saatYed+=24;
+    //Serial.println("////Saat 2  "+String(saatYed));
+    saatYed-=14;
+
+    
+    sicaklikY=yuksekSicakliklar[ay]-((fark/12)*saatYed);
+    //Serial.println("////Saat 3  "+String(saatYed));
+    
+  }
+  return sicaklikY;
+}
 void setup() {
+
+  //myRTC.setDS1302Time(00, 16, 14, 6, 03, 05, 2018);
+  myRTC.updateTime();
 
   pinMode(buttonPin1, OUTPUT);
   pinMode(buttonPin2, OUTPUT);
@@ -64,60 +112,68 @@ void setup() {
   lcd.print("Loading");
   delay(2000); 
   lcdClear();
-  lcdPrint(String(ortSicakliklar[1]));
+  lcdPrint(String(myRTC.dayofmonth)+" "+String(aylar[myRTC.month])+" "+myRTC.year);
+  sicaklikGuncel=sicaklikHesapla(myRTC.month,myRTC.hours);
+    
+  lcdPrint(String(myRTC.dayofmonth)+" "+String(aylar[myRTC.month])+" "+myRTC.year,"sicaklik : "+String(sicaklikGuncel));;
   delay(2000); 
   lcdClear();
+  
+}
+void loopSlow(){
   
 }
 void loop() {
 
   myRTC.updateTime();
+  
+  loopCount++;
+  if(loopCount==2000)
+  {
+    loopSlow();
+    loopCount=0;
+  }
  
 // Şimdi değerleri okuyalım
-Serial.print("Şuanki Tarih / Saat : ");
-Serial.print(myRTC.dayofmonth);
-Serial.print("/");
-Serial.print(myRTC.month);
-Serial.print("/");
-Serial.print(myRTC.year);
-Serial.print(" ");
-Serial.print(myRTC.hours);
-Serial.print(":");
-Serial.print(myRTC.minutes);
-Serial.print(":");
-Serial.println(myRTC.seconds);
+//Serial.print("Şuanki Tarih / Saat : ");
+//Serial.print(myRTC.dayofmonth);
+//Serial.print("/");
+//Serial.print(myRTC.month);
+//Serial.print("/");
+//Serial.print(myRTC.year);
+//Serial.print(" ");
+//Serial.print(myRTC.hours);
+//Serial.print(":");
+//Serial.print(myRTC.minutes);
+//Serial.print(":");
+//Serial.println(myRTC.seconds);
 
   int button1State = digitalRead(buttonPin1);
   int button2State = digitalRead(buttonPin2);
   int button3State = digitalRead(buttonPin3);
 
-
   if(button1State==1)
   {
     mode=1;
     lcdClear();
-    
   }else if(button2State==1)
   {
     mode=2;
     lcdClear();
-    
   }else if(button3State==1)
   {
     mode=3;
-    lcdClear();
-    
+    lcdClear(); 
   }
 
-  
-  
   int chk = DHT11.read(DHT11PIN);
   sicaklik=DHT11.temperature;
   nem=DHT11.humidity;
 
   if(mode==0)
   {
-     lcdPrint(String("Nem %"+(String)int(nem)),String("Sicaklik (C):"+(String)int(sicaklik)));
+     lcdPrint(String((String)int(sicaklik))+" C"+" | "+String("Nem %"+(String)int(nem)));
+     lcd2Print("Hava Sicakligi","Tahmini "+String(sicaklikGuncel)+" C");
     
   
   }else if(mode==1)
@@ -154,8 +210,6 @@ Serial.println(myRTC.seconds);
       
       lcd2Print("                  ");
   }
-  
-  
   delay(200);
 }
 
