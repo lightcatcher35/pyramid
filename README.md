@@ -23,7 +23,7 @@ bir insanın 1 yılda maruz kalacağı radyasyon miktarı 100 milisieverttir. fa
 
 
 MQ135 ve diğer gaz sensörlerinin özellikleri ve farklılıkları
-http://www.pridopia.co.uk/pi-doc/ESP8266ATCommandsSet.pdf
+https://components101.com/sensors/mq135-gas-sensor-for-air-quality
 
 Wifi Alıcısı AT Komutları
 http://www.pridopia.co.uk/pi-doc/ESP8266ATCommandsSet.pdf
