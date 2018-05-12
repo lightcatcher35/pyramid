@@ -2,7 +2,10 @@
 #include <dht11.h> // dht11 kütüphanesini ekliyoruz.
 #include <virtuabotixRTC.h>        // RTC Modülü kütüphanesi 
 
-#include "MQ135.h"                                                                    
+#include "MQ135.h"
+MQ135 gasSensor = MQ135(A0);
+
+                                                                    
  
 virtuabotixRTC myRTC(26, 27, 28);
 
@@ -61,10 +64,6 @@ void lcd2Print(String text1,String text2="                 ")
 float sicaklikHesapla(int ay,int saat)
 {
   float sicaklikY=0;
-  Serial.print(saat);
-  Serial.print("/");
-  Serial.print(ay);
-  Serial.println("/");
   if(saat==14)
   {
     sicaklikY=yuksekSicakliklar[ay];
@@ -77,23 +76,17 @@ float sicaklikHesapla(int ay,int saat)
     float fark=yuksekSicakliklar[ay]-dusukSicakliklar[ay];
     int saatFark=(saat-4);
     
-    //Serial.println("////Fark "+String((fark/9)));
     sicaklikY=dusukSicakliklar[ay]+((fark/9)*saatFark);
-    //Serial.println("////////////"+String(sicaklikY));
   }else
   {
     
     float fark=yuksekSicakliklar[ay]-dusukSicakliklar[ay];
     int saatYed=saat;
-    //Serial.println("////Saat 1  "+String(saatYed));
+    
     if(saatYed<4) saatYed+=24;
-    //Serial.println("////Saat 2  "+String(saatYed));
     saatYed-=14;
-
     
     sicaklikY=yuksekSicakliklar[ay]-((fark/12)*saatYed);
-    //Serial.println("////Saat 3  "+String(saatYed));
-    
   }
   return sicaklikY;
 }
@@ -107,6 +100,9 @@ void setup() {
   pinMode(buttonPin3, OUTPUT);
   
   Serial.begin(9600);
+  
+  Serial.println("Doğa Mavişehir 1 Robotik Projesi");
+  
   
   lcd.begin(16, 2);
   lcd2.begin(16, 2);
@@ -128,7 +124,15 @@ void loopSlow(){
   sicaklik=DHT11.temperature;
   nem=DHT11.humidity;
 
-  Serial.println("okkeeyy");
+  
+  Serial.println(" ");
+  int a0read=analogRead(A0);
+  Serial.println(" A0 : "+String(a0read));
+  Serial.println(" get resistance : "+String(gasSensor.getResistance()));
+  
+  Serial.println(" get PPM : "+String(gasSensor.getPPM()));
+  Serial.println(" get corrected PPM : "+String(gasSensor.getCorrectedPPM(sicaklik,nem)));
+
   if(mode==0)
   {
      lcdPrint(String((String)int(sicaklik))+" C"+" | "+String("Nem %"+(String)int(nem)));
