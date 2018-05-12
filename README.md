@@ -1,4 +1,4 @@
-# pyramid
+﻿# pyramid
 
 
 <h1>Akıllı ev arduino projesi</h1>
@@ -20,6 +20,10 @@ bir insanın 1 yılda maruz kalacağı radyasyon miktarı 100 milisieverttir. fa
 
 
 <b>İhtiyaç Duyulabilecek Linkler</b>
+
+
+MQ135 ve diğer gaz sensörlerinin özellikleri ve farklılıkları
+http://www.pridopia.co.uk/pi-doc/ESP8266ATCommandsSet.pdf
 
 Wifi Alıcısı AT Komutları
 http://www.pridopia.co.uk/pi-doc/ESP8266ATCommandsSet.pdf
