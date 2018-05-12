@@ -1,16 +1,18 @@
 #include <LiquidCrystal.h> // LCD Kütüphanesi
 #include <dht11.h> // dht11 kütüphanesini ekliyoruz.
-#include <virtuabotixRTC.h>        // RTC Modülü kütüphanesi                                                                     
+#include <virtuabotixRTC.h>        // RTC Modülü kütüphanesi 
+
+#include "MQ135.h"                                                                    
  
-virtuabotixRTC myRTC(28, 29, 30);
+virtuabotixRTC myRTC(26, 27, 28);
 
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2); // LCD  pinleri
-LiquidCrystal lcd2(10, 9, 25, 24, 23, 22); // LCD  pinleri
+LiquidCrystal lcd(12, 11, 35, 34, 33, 32); // LCD  pinleri
+LiquidCrystal lcd2(10, 9, 45, 44, 43, 42); // LCD  pinleri
 
-#define DHT11PIN 6 // DHT11 sensörü pini
-const int buttonPin1 = 39;
-const int buttonPin2 = 40;
-const int buttonPin3 = 41;
+#define DHT11PIN 36 // DHT11 sensörü pini
+const int buttonPin1 = 29;
+const int buttonPin2 = 30;
+const int buttonPin3 = 31;
 
 dht11 DHT11; // DHT11 nesnesi oluşturuluyor
 float sicaklik,nem=0;
@@ -97,7 +99,7 @@ float sicaklikHesapla(int ay,int saat)
 }
 void setup() {
 
-  //myRTC.setDS1302Time(00, 16, 14, 6, 03, 05, 2018);
+  //myRTC.setDS1302Time(00, 07, 18, 6, 12, 05, 2018);
   myRTC.updateTime();
 
   pinMode(buttonPin1, OUTPUT);
@@ -122,54 +124,11 @@ void setup() {
 }
 void loopSlow(){
   
-}
-void loop() {
-
-  myRTC.updateTime();
-  
-  loopCount++;
-  if(loopCount==2000)
-  {
-    loopSlow();
-    loopCount=0;
-  }
- 
-// Şimdi değerleri okuyalım
-//Serial.print("Şuanki Tarih / Saat : ");
-//Serial.print(myRTC.dayofmonth);
-//Serial.print("/");
-//Serial.print(myRTC.month);
-//Serial.print("/");
-//Serial.print(myRTC.year);
-//Serial.print(" ");
-//Serial.print(myRTC.hours);
-//Serial.print(":");
-//Serial.print(myRTC.minutes);
-//Serial.print(":");
-//Serial.println(myRTC.seconds);
-
-  int button1State = digitalRead(buttonPin1);
-  int button2State = digitalRead(buttonPin2);
-  int button3State = digitalRead(buttonPin3);
-
-  if(button1State==1)
-  {
-    mode=1;
-    lcdClear();
-  }else if(button2State==1)
-  {
-    mode=2;
-    lcdClear();
-  }else if(button3State==1)
-  {
-    mode=3;
-    lcdClear(); 
-  }
-
   int chk = DHT11.read(DHT11PIN);
   sicaklik=DHT11.temperature;
   nem=DHT11.humidity;
 
+  Serial.println("okkeeyy");
   if(mode==0)
   {
      lcdPrint(String((String)int(sicaklik))+" C"+" | "+String("Nem %"+(String)int(nem)));
@@ -210,7 +169,54 @@ void loop() {
       
       lcd2Print("                  ");
   }
-  delay(200);
+}
+void loop() {
+
+  myRTC.updateTime();
+  
+  loopCount++;
+  
+  if(loopCount>=1000)
+  {
+    loopSlow();
+    loopCount=0;
+  }
+ 
+// Şimdi değerleri okuyalım
+//Serial.print("Şuanki Tarih / Saat : ");
+//Serial.print(myRTC.dayofmonth);
+//Serial.print("/");
+//Serial.print(myRTC.month);
+//Serial.print("/");
+//Serial.print(myRTC.year);
+//Serial.print(" ");
+//Serial.print(myRTC.hours);
+//Serial.print(":");
+//Serial.print(myRTC.minutes);
+//Serial.print(":");
+//Serial.println(myRTC.seconds);
+
+  int button1State = digitalRead(buttonPin1);
+  int button2State = digitalRead(buttonPin2);
+  int button3State = digitalRead(buttonPin3);
+
+  if(button1State==1)
+  {
+    mode=1;
+    lcdClear();
+    loopSlow();
+  }else if(button2State==1)
+  {
+    mode=2;
+    lcdClear();
+    loopSlow();
+  }else if(button3State==1)
+  {
+    mode=3;
+    lcdClear(); 
+    loopSlow();
+  }
+
 }
 
 
