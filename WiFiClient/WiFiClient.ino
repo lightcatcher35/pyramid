@@ -2,8 +2,8 @@
 #include <ESP8266WiFi.h>
 #include <ArduinoJson.h>
 
-const char* ssid     = "paradox35";
-const char* password = "SimonSchama35";
+const char* ssid     = "Alihan";
+const char* password = "12345678";
 
 const char* host = "api.openweathermap.org";
 
