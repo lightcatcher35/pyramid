@@ -10,8 +10,17 @@ MQ135 gasSensor = MQ135(A0);
 
 #define DHT11PIN D6 // DHT11PIN olarak Dijital 2'yi belirliyoruz.
 
+const int button1Pin = D10;
+const int button2Pin = D11;
+
 const char* ssid     = "paradox35";
 const char* password = "SimonSchama35";
+
+//const char* ssid     = "MAVISEHIR_BILIM_LOBI_2";
+//const char* password = "Doga204060!";
+
+//const char* ssid     = "ilkeriphone";
+//const char* password = "12345679";
 
 const char* host = "api.openweathermap.org";
 
@@ -22,16 +31,21 @@ float havaResist = 0;
 float havaPPM = 0;
 float havaCPPM = 0;
 
-String hava_durumu;
-float hava_derecesi;
+String hava_durumu="";
+float hava_derecesi=0;
 
-float UV_orani=0;
+float UV_orani = 0;
 
 float hava_kirliligi;
 
 int internet = 0;
 
-double lastTime=0;
+double lastTime = 0;
+double ekranTimer=0;
+double ortamTimer=0;
+
+int mod=0;
+int pressed=0;
 
 
 StaticJsonBuffer<200> jsonBuffer;
@@ -58,6 +72,9 @@ void setup() {
   Serial.begin(115200);
   lcd.begin(16, 2);
   delay(10);
+
+  pinMode(button1Pin, OUTPUT);
+  pinMode(button2Pin, OUTPUT);
 
 
   lcd.print("Loading");
@@ -92,7 +109,7 @@ void setup() {
     internet = 1;
     lcdPrint("Connected ", String(ssid));
     delay(1500);
-    
+
     lcdPrint("Web server'a ", "baglaniliyor");
     havaDurumu();
     lcdPrint("Hava Durumu ", "guncellendi");
@@ -104,6 +121,8 @@ void setup() {
     lcdPrint("Internete ", "Bagli degil");
     delay(1500);
   }
+
+  ortamVeriGuncelle();
   //lcdClear();
 
 }
@@ -120,7 +139,7 @@ void havaDurumu()
   WiFiClient client;
   const int httpPort = 80;
   if (!client.connect(host, httpPort)) {
-    
+
     lcdPrint("Baglanti", "basarisiz");
     Serial.println("connection failed");
     return;
@@ -128,7 +147,7 @@ void havaDurumu()
 
   String url = "/data/2.5/weather?q=Izmir,TR&appid=5485a5c443e83636374329f55e49120d";
 
-  
+
   client.print(String("GET ") + url + " HTTP/1.1\r\n" +
                "Host: " + host + "\r\n" +
                "Connection: close\r\n\r\n");
@@ -156,11 +175,20 @@ void havaDurumu()
       {
         String havaDurumuEn = root1["weather"][0]["main"];
         float havaDerecesi = root1["main"]["temp"];
-        havaDerecesi -= 273, 15;
-        hava_derecesi=havaDerecesi;
-        Serial.println(String(havaDerecesi) + " Derece ");
+
         
-       
+        havaDerecesi -= 273, 15;
+        hava_derecesi = havaDerecesi;
+        if(havaDurumuEn=="Clouds")
+        {
+          hava_durumu="Bulutlu";
+        }else if(havaDurumuEn=="clear")
+        {
+          hava_durumu="Hava Acik";
+        }else hava_durumu=havaDurumuEn;
+        Serial.println(String(havaDerecesi) + " Derece ");
+
+
         break;
       }
     }
@@ -179,7 +207,7 @@ void UVDurumu()
   WiFiClient client;
   const int httpPort = 80;
   if (!client.connect(host, httpPort)) {
-    
+
     lcdPrint("Baglanti", "basarisiz");
     Serial.println("connection failed");
     return;
@@ -187,7 +215,7 @@ void UVDurumu()
 
   String url = "/data/2.5/uvi?lat=38.423&lon=27.142&appid=5485a5c443e83636374329f55e49120d";
 
-  
+
   client.print(String("GET ") + url + " HTTP/1.1\r\n" +
                "Host: " + host + "\r\n" +
                "Connection: close\r\n\r\n");
@@ -212,7 +240,7 @@ void UVDurumu()
       if (root1.success())
       {
         UV_orani = root1["value"];
-       
+
         break;
       }
     }
@@ -221,104 +249,21 @@ void UVDurumu()
 
 }
 
-void havaKirliligi()
+
+void ortamVeriGuncelle()
 {
-
-  //lcdPrint("Web server'a ", "baglaniliyor");
-  Serial.println(host);
-
-  // Use WiFiClient class to create TCP connections
-  WiFiClient client;
-  const int httpPort = 80;
-  if (!client.connect(host, httpPort)) {
-    
-    lcdPrint("Baglanti", "basarisiz");
-    Serial.println("connection failed");
-    return;
-  }
-
-  String url = "/data/2.5/uvi?lat=38.423&lon=27.142&appid=5485a5c443e83636374329f55e49120d";
-
-  
-  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-               "Host: " + host + "\r\n" +
-               "Connection: close\r\n\r\n");
-  unsigned long timeout = millis();
-  while (client.available() == 0) {
-    if (millis() - timeout > 5000) {
-      //Serial.println(">>> Client Timeout !");
-      client.stop();
-      return;
-    }
-  }
-
-  while (client.available()) {
-    String line = client.readStringUntil('\n');
-    Serial.println(line);
-    if (line.indexOf("date_iso") > 0)
-    {
-      String satir = line;
-
-      StaticJsonBuffer<1000> jsonBuffer;
-      JsonObject& root1 = jsonBuffer.parseObject(satir);
-      if (root1.success())
-      {
-        UV_orani = root1["value"];
-        lcdPrint("UV Orani", "guncellendi");
-       
-        break;
-      }
-    }
-  }
-
-
-}
-void loop() {
-
-  if(internet)
-  if (millis() - lastTime > 1000000)
-  {
-    havaDurumu();
-    UVDurumu();
-    lastTime = millis();    
-  }
-
-  ++value;
-}
-void tumVeriler()
-{
-  Serial.println("\n");
-  // Sensörün okunup okunmadığını konrol ediyoruz.
-  // chk 0 ise sorunsuz okunuyor demektir. Sorun yaşarsanız
-  // chk değerini serial monitörde yazdırıp kontrol edebilirsiniz.
   int chk = DHT11.read(DHT11PIN);
 
-  // Sensörden gelen verileri serial monitörde yazdırıyoruz.
   Serial.print("Nem (%): ");
   Serial.println((float)DHT11.humidity, 2);
 
   Serial.print("Sicaklik (Celcius): ");
   Serial.println((float)DHT11.temperature, 2);
 
-  Serial.print("Sicaklik (Fahrenheit): ");
-  Serial.println(DHT11.fahrenheit(), 2);
-
-  Serial.print("Sicaklik (Kelvin): ");
-  Serial.println(DHT11.kelvin(), 2);
-
-  // Çiğ Oluşma Noktası, Dew Point
-  Serial.print("Cig Olusma Noktasi: ");
-  Serial.println(DHT11.dewPoint(), 2);
-
   sicaklik = DHT11.temperature;
   nem = DHT11.humidity;
 
-
-  Serial.println(" ");
   int a0read = analogRead(A0);
-  Serial.println(" A0 : " + String(a0read));
-  Serial.println(" get resistance : " + String(gasSensor.getResistance()));
-  a0read = analogRead(A0);
   havaResist = gasSensor.getResistance();
   havaPPM = gasSensor.getPPM();
   havaCPPM = gasSensor.getCorrectedPPM(sicaklik, nem);
@@ -327,9 +272,84 @@ void tumVeriler()
   Serial.println(" get corrected PPM : " + String(gasSensor.getCorrectedPPM(sicaklik, nem)));
   Serial.println(" A0 : " + String(a0read));
   Serial.println(" get resistance : " + String(havaResist));
+}
 
+void ekran_tazele()
+{
+  if(mod==0)
+  {
+    lcdPrint(String(int(sicaklik))+"C |Nem "+String(int(nem)),hava_durumu+" "+String(hava_derecesi)+"C");
+  }else if(mod==1)
+  {
+    lcdPrint("Sicaklık");
+  }else if(mod==2)
+  {
+    lcdPrint("Nem");
+  }else if(mod==3)
+  {
+    lcdPrint("Hava Kalitesi");
+  }else if(mod==4)
+  {
+    lcdPrint("Hava Durumu");
+  }else if(mod==5)
+  {
+    lcdPrint("UV Isinlari");
+  }
 
-  delay(3000);
+  
+  
+  
+}
+void loop()
+{
+  int buttonState1 = digitalRead(button1Pin);
+  int buttonState2 = digitalRead(button2Pin);
+  Serial.println(" buton 1 " +String(buttonState1)+" | buton 2 "+String(buttonState2));
 
+  if(buttonState1==1)
+  {
+    if(pressed==0)
+    {
+      
+  Serial.println(" okkkkkkkkkkkkkkkkkkkkkkkkkkkk");
+      pressed=1;
+      if(mod!=0)
+      {
+        mod=0;
+        ekran_tazele();
+      }
+    }
+    
+  }else if(buttonState2==1)
+  {
+    if(pressed==0)
+    {
+      
+  Serial.println(" okkkkkkkkkkkkkkkkkkkkkkkkkkkk");
+      pressed=1;
+      mod++;
+      if(mod>5) mod=0;
+      ekran_tazele();
+    }
+  }else pressed=0;
+  delay(100);
+
+  if (internet)
+    if (millis() - lastTime > 1000000)
+    {
+      havaDurumu();
+      UVDurumu();
+      lastTime = millis();
+    };
+
+    if (millis() - ekranTimer > 1000)
+    {
+      
+      ekranTimer = millis();
+      ekran_tazele();
+    }
+  
+
+  ++value;
 }
 
