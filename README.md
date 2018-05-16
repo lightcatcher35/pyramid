@@ -21,8 +21,8 @@ bir insanın 1 yılda maruz kalacağı radyasyon miktarı 100 milisieverttir. fa
 
 <b>İhtiyaç Duyulabilecek Linkler</b>
 
-Wifi Alıcısı AT Komutları
-http://www.pridopia.co.uk/pi-doc/ESP8266ATCommandsSet.pdf
+UV ışınlarının etkileri
+http://www.wiki-zero.net/index.php?q=aHR0cHM6Ly9lbi53aWtpcGVkaWEub3JnL3dpa2kvVWx0cmF2aW9sZXRfaW5kZXg
 
 Wifi ile konum bulma:
 https://github.com/gmag11/WifiLocation
