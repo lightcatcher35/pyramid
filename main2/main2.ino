@@ -31,8 +31,8 @@ float havaResist = 0;
 float havaPPM = 0;
 float havaCPPM = 0;
 
-String hava_durumu="";
-float hava_derecesi=0;
+String hava_durumu = "";
+float hava_derecesi = 0;
 
 float UV_orani = 0;
 
@@ -41,11 +41,11 @@ float hava_kirliligi;
 int internet = 0;
 
 double lastTime = 0;
-double ekranTimer=0;
-double ortamTimer=0;
+double ekranTimer = 0;
+double ortamTimer = 0;
 
-int mod=0;
-int pressed=0;
+int mod = 0;
+int pressed = 0;
 
 
 StaticJsonBuffer<200> jsonBuffer;
@@ -176,16 +176,16 @@ void havaDurumu()
         String havaDurumuEn = root1["weather"][0]["main"];
         float havaDerecesi = root1["main"]["temp"];
 
-        
+
         havaDerecesi -= 273, 15;
         hava_derecesi = havaDerecesi;
-        if(havaDurumuEn=="Clouds")
+        if (havaDurumuEn == "Clouds")
         {
-          hava_durumu="Bulutlu";
-        }else if(havaDurumuEn=="clear")
+          hava_durumu = "Bulutlu";
+        } else if (havaDurumuEn == "clear")
         {
-          hava_durumu="Hava Acik";
-        }else hava_durumu=havaDurumuEn;
+          hava_durumu = "Hava Acik";
+        } else hava_durumu = havaDurumuEn;
         Serial.println(String(havaDerecesi) + " Derece ");
 
 
@@ -276,62 +276,58 @@ void ortamVeriGuncelle()
 
 void ekran_tazele()
 {
-  if(mod==0)
+  if (mod == 0)
   {
-    lcdPrint(String(int(sicaklik))+"C |Nem "+String(int(nem)),hava_durumu+" "+String(hava_derecesi)+"C");
-  }else if(mod==1)
+    lcdPrint(String(int(sicaklik)) + "C | Nem %" + String(int(nem)), hava_durumu + " " + String(hava_derecesi) + "C");
+  } else if (mod == 1)
   {
-    lcdPrint("Sicaklık");
-  }else if(mod==2)
+    lcdPrint("Ortam Sicaklik " , String(hava_derecesi) + "C");
+  } else if (mod == 2)
   {
-    lcdPrint("Nem");
-  }else if(mod==3)
+    lcdPrint("Nem %" + String(int(nem)));
+  } else if (mod == 3)
   {
-    lcdPrint("Hava Kalitesi");
-  }else if(mod==4)
+    lcdPrint("Ortam Hava","Kalitesi "+String(havaCPPM));
+  } else if (mod == 4)
   {
-    lcdPrint("Hava Durumu");
-  }else if(mod==5)
+    lcdPrint("Hava Durumu ", hava_durumu + " " + String(hava_derecesi) + "C");
+  } else if (mod == 5)
   {
-    lcdPrint("UV Isinlari");
+    lcdPrint("UV Gunes Isini","Orani : "+String(UV_orani));
   }
-
-  
-  
-  
 }
 void loop()
 {
   int buttonState1 = digitalRead(button1Pin);
   int buttonState2 = digitalRead(button2Pin);
-  Serial.println(" buton 1 " +String(buttonState1)+" | buton 2 "+String(buttonState2));
+  Serial.println(" buton 1 " + String(buttonState1) + " | buton 2 " + String(buttonState2));
 
-  if(buttonState1==1)
+  if (buttonState1 == 1)
   {
-    if(pressed==0)
+    if (pressed == 0)
     {
-      
-  Serial.println(" okkkkkkkkkkkkkkkkkkkkkkkkkkkk");
-      pressed=1;
-      if(mod!=0)
+
+      Serial.println(" okkkkkkkkkkkkkkkkkkkkkkkkkkkk");
+      pressed = 1;
+      if (mod != 0)
       {
-        mod=0;
+        mod = 0;
         ekran_tazele();
       }
     }
-    
-  }else if(buttonState2==1)
+
+  } else if (buttonState2 == 1)
   {
-    if(pressed==0)
+    if (pressed == 0)
     {
-      
-  Serial.println(" okkkkkkkkkkkkkkkkkkkkkkkkkkkk");
-      pressed=1;
+
+      Serial.println(" okkkkkkkkkkkkkkkkkkkkkkkkkkkk");
+      pressed = 1;
       mod++;
-      if(mod>5) mod=0;
+      if (mod > 5) mod = 0;
       ekran_tazele();
     }
-  }else pressed=0;
+  } else pressed = 0;
   delay(100);
 
   if (internet)
@@ -341,14 +337,17 @@ void loop()
       UVDurumu();
       lastTime = millis();
     };
+    if (millis() - ortamTimer > 10000)
+  {
+    ortamTimer = millis();
+    ortamVeriGuncelle();
+  }
+  if (millis() - ekranTimer > 1000)
+  {
+    ekranTimer = millis();
+    ekran_tazele();
+  }
 
-    if (millis() - ekranTimer > 1000)
-    {
-      
-      ekranTimer = millis();
-      ekran_tazele();
-    }
-  
 
   ++value;
 }
