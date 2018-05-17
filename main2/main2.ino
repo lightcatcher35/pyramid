@@ -13,8 +13,11 @@ MQ135 gasSensor = MQ135(A0);
 const int button1Pin = D10;
 const int button2Pin = D11;
 
-const char* ssid     = "paradox35";
-const char* password = "SimonSchama35";
+const char* ssid     = "Alihan";
+const char* password = "12345678";
+
+//const char* ssid     = "paradox35";
+//const char* password = "SimonSchama35";
 
 //const char* ssid     = "MAVISEHIR_BILIM_LOBI_2";
 //const char* password = "Doga204060!";
@@ -267,11 +270,14 @@ void ortamVeriGuncelle()
   havaResist = gasSensor.getResistance();
   havaPPM = gasSensor.getPPM();
   havaCPPM = gasSensor.getCorrectedPPM(sicaklik, nem);
-
+  if (a0read > 30) {
+    mod=99;
+  }
   Serial.println(" get PPM : " + String(gasSensor.getPPM()));
   Serial.println(" get corrected PPM : " + String(gasSensor.getCorrectedPPM(sicaklik, nem)));
   Serial.println(" A0 : " + String(a0read));
   Serial.println(" get resistance : " + String(havaResist));
+  
 }
 
 void ekran_tazele()
@@ -294,6 +300,10 @@ void ekran_tazele()
   } else if (mod == 5)
   {
     lcdPrint("UV Gunes Isini","Orani : "+String(UV_orani));
+  } else if (mod== 99) 
+  {
+    lcdPrint("Uyarı","Ortamdan Uzaklas!");
+    
   }
 }
 void loop()
@@ -324,7 +334,7 @@ void loop()
       Serial.println(" okkkkkkkkkkkkkkkkkkkkkkkkkkkk");
       pressed = 1;
       mod++;
-      if (mod > 5) mod = 0;
+      if (mod > 5 && !(mod>90 && mod<100)) mod = 0;
       ekran_tazele();
     }
   } else pressed = 0;
