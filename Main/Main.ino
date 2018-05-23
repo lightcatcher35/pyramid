@@ -97,7 +97,7 @@ float sicaklikHesapla(int ay,int saat)
 }
 void setup() {
 
-  //myRTC.setDS1302Time(00, 16, 14, 6, 03, 05, 2018);
+  //myRTC.setDS1302Time(00, 13, 12, 6, 07, 05, 2018);
   myRTC.updateTime();
 
   pinMode(buttonPin1, OUTPUT);
@@ -152,6 +152,8 @@ void loop() {
   int button2State = digitalRead(buttonPin2);
   int button3State = digitalRead(buttonPin3);
 
+  Serial.print(button1State);
+
   if(button1State==1)
   {
     mode=1;
@@ -181,11 +183,11 @@ void loop() {
     lcdPrint(String("Sicaklik :"+(String)int(sicaklik)+" C")); 
     lcd2Print("            ");
 
-    if(sicaklik<20)
+    if(sicaklik<25)
     {
-      lcd2Print("Odadaki sicaklik","fazla dusuk");
-    }else if(sicaklik>25)
-    { lcd2Print("Odadaki sicaklik","fazla yuksek");
+      lcd2Print("Hava","Normal");
+    }else if(sicaklik>=25)
+    { lcd2Print("Hava","Sicak");
       
     }
     
@@ -193,10 +195,9 @@ void loop() {
   }else if(mode==2)
   {
     lcdPrint(String("Nem %"+(String)int(nem)));
-    String oneriMetin="";
-    if(nem>60)
+         if(nem>60)
     {
-      lcd2Print("Odadaki nem orani","biraz fazla");
+      lcd2Print("Odadaki nem orani","yüksek");
     }else if(nem<61 && nem>39)
     {
       lcd2Print("Odadaki nem orani","uygun degerlerde");
@@ -204,7 +205,7 @@ void loop() {
     {
       lcd2Print("Nem orani dusuk.","Hava kuru.");
     }
-    lcd.print(oneriMetin);
+    //lcd.print(oneriMetin);
   }else if(mode==3){
       lcdPrint("Hava Kalitesi (%): ...");
       
