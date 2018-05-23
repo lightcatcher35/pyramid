@@ -13,8 +13,8 @@ MQ135 gasSensor = MQ135(A0);
 const int button1Pin = D10;
 const int button2Pin = D11;
 
-//const char* ssid     = "Alihan";
-//const char* password = "12345678";
+const char* ssid     = "Alihan";
+const char* password = "12345678";
 
 //const char* ssid     = "paradox35";
 //const char* password = "SimonSchama35";
@@ -22,8 +22,8 @@ const int button2Pin = D11;
 //const char* ssid     = "MAVISEHIR_BILIM_LOBI_2";
 //const char* password = "Doga204060!";
 
-const char* ssid     = "ilkeriphone";
-const char* password = "12345679";
+//const char* ssid     = "ilkeriphone";
+//const char* password = "12345679";
 
 
 //const char* ssid     = "BilisimLab";
@@ -174,61 +174,64 @@ void havaDurumu()
       internet = 1;
     }
   }
+  if (internet == 1)
+  {
 
-  Serial.println(host);
+    Serial.println(host);
 
-  // Use WiFiClient class to create TCP connections
-  WiFiClient client;
-  const int httpPort = 80;
-  if (!client.connect(host, httpPort)) {
+    // Use WiFiClient class to create TCP connections
+    WiFiClient client;
+    const int httpPort = 80;
+    if (!client.connect(host, httpPort)) {
 
-    lcdPrint("Baglanti", "basarisiz");
-    Serial.println("connection failed");
-    return;
-  }
-
-  String url = "/data/2.5/weather?q=Izmir,TR&appid=5485a5c443e83636374329f55e49120d";
-
-
-  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-               "Host: " + host + "\r\n" +
-               "Connection: close\r\n\r\n");
-  unsigned long timeout = millis();
-  while (client.available() == 0) {
-    if (millis() - timeout > 5000) {
-      //Serial.println(">>> Client Timeout !");
-      client.stop();
+      lcdPrint("Baglanti", "basarisiz");
+      Serial.println("connection failed");
       return;
     }
-  }
 
-  while (client.available()) {
-    String line = client.readStringUntil('\n');
-    if (line.indexOf("coord") > 0)
-    {
+    String url = "/data/2.5/weather?q=Izmir,TR&appid=5485a5c443e83636374329f55e49120d";
 
 
-      String satir = line;
-      //Serial.println(satir);
+    client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+                 "Host: " + host + "\r\n" +
+                 "Connection: close\r\n\r\n");
+    unsigned long timeout = millis();
+    while (client.available() == 0) {
+      if (millis() - timeout > 5000) {
+        //Serial.println(">>> Client Timeout !");
+        client.stop();
+        return;
+      }
+    }
 
-      StaticJsonBuffer<1000> jsonBuffer;
-      JsonObject& root1 = jsonBuffer.parseObject(satir);
-      if (root1.success())
+    while (client.available()) {
+      String line = client.readStringUntil('\n');
+      if (line.indexOf("coord") > 0)
       {
-        String havaDurumuEn = root1["weather"][0]["main"];
-        float havaDerecesi = root1["main"]["temp"];
 
 
-        havaDerecesi -= 273, 15;
-        hava_derecesi = havaDerecesi;
-        if (havaDurumuEn == "Clouds")
+        String satir = line;
+        //Serial.println(satir);
+
+        StaticJsonBuffer<1000> jsonBuffer;
+        JsonObject& root1 = jsonBuffer.parseObject(satir);
+        if (root1.success())
         {
-          hava_durumu = "Bulutlu";
-        } else if (havaDurumuEn == "Clear")
-        {
-          hava_durumu = "Hava Acik";
-        } else hava_durumu = havaDurumuEn;
-        break;
+          String havaDurumuEn = root1["weather"][0]["main"];
+          float havaDerecesi = root1["main"]["temp"];
+
+
+          havaDerecesi -= 273, 15;
+          hava_derecesi = havaDerecesi;
+          if (havaDurumuEn == "Clouds")
+          {
+            hava_durumu = "Bulutlu";
+          } else if (havaDurumuEn == "Clear")
+          {
+            hava_durumu = "Hava Acik";
+          } else hava_durumu = havaDurumuEn;
+          break;
+        }
       }
     }
   }
@@ -259,84 +262,87 @@ void UVDurumu()
     }
   }
 
-  //lcdPrint("Web server'a ", "baglaniliyor");
-  Serial.println(host);
+  if (internet == 1)
+  {
+    //lcdPrint("Web server'a ", "baglaniliyor");
+    Serial.println(host);
 
-  // Use WiFiClient class to create TCP connections
-  WiFiClient client;
-  const int httpPort = 80;
-  if (!client.connect(host, httpPort)) {
+    // Use WiFiClient class to create TCP connections
+    WiFiClient client;
+    const int httpPort = 80;
+    if (!client.connect(host, httpPort)) {
 
-    lcdPrint("Baglanti", "basarisiz");
-    Serial.println("connection failed");
-    return;
-  }
-
-  String url = "/data/2.5/uvi?lat=38.423&lon=27.142&appid=5485a5c443e83636374329f55e49120d";
-
-
-  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-               "Host: " + host + "\r\n" +
-               "Connection: close\r\n\r\n");
-  unsigned long timeout = millis();
-  while (client.available() == 0) {
-    if (millis() - timeout > 5000) {
-      //Serial.println(">>> Client Timeout !");
-      client.stop();
+      lcdPrint("Baglanti", "basarisiz");
+      Serial.println("connection failed");
       return;
     }
-  }
 
-  while (client.available()) {
-    String line = client.readStringUntil('\n');
-    Serial.println(line);
-    if (line.indexOf("date_iso") > 0)
-    {
-      String satir = line;
+    String url = "/data/2.5/uvi?lat=38.423&lon=27.142&appid=5485a5c443e83636374329f55e49120d";
 
-      StaticJsonBuffer<1000> jsonBuffer;
-      JsonObject& root1 = jsonBuffer.parseObject(satir);
-      if (root1.success())
-        UVAdet = 1;
+
+    client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+                 "Host: " + host + "\r\n" +
+                 "Connection: close\r\n\r\n");
+    unsigned long timeout = millis();
+    while (client.available() == 0) {
+      if (millis() - timeout > 5000) {
+        //Serial.println(">>> Client Timeout !");
+        client.stop();
+        return;
+      }
+    }
+
+    while (client.available()) {
+      String line = client.readStringUntil('\n');
+      Serial.println(line);
+      if (line.indexOf("date_iso") > 0)
       {
-        UV_orani = root1["value"];
-        if (UV_orani < 4)
+        String satir = line;
+
+        StaticJsonBuffer<1000> jsonBuffer;
+        JsonObject& root1 = jsonBuffer.parseObject(satir);
+        if (root1.success())
+          UVAdet = 1;
         {
-          UVAdet += 2;
-          UVCumle[1] = "Zararsiz UV|Orani";
-          UVCumle[2] = "Zarar gorme riski|cok az";
+          UV_orani = root1["value"];
+          if (UV_orani < 4)
+          {
+            UVAdet += 2;
+            UVCumle[1] = "Zararsiz UV|Orani";
+            UVCumle[2] = "Zarar gorme riski|cok az";
 
-        } else if (UV_orani < 6) {
-          UVAdet += 4;
-          UVCumle[1] = "Ortalama UV orani|Az riskli";
-          UVCumle[2] = "Gunese saatlerce|maruz kalmamasi";
-          UVCumle[3] = "Disinda|zararsiz";
-          UVCumle[4] = "Onerilenler;|Gunes Gozlugu";
-        } else if (UV_orani < 8) {
-          UVAdet += 5;
-          UVCumle[1] = "Yuksek UV orani| ";
-          UVCumle[2] = "Gunes ile uzun|sureli temas";
-          UVCumle[3] = "halinde goz|ve cilt zarar";
-          UVCumle[4] = "Gorebilir|Onerilenler;";
-          UVCumle[5] = "Gunes Korumali|Gozluk, Kiyafet";
+          } else if (UV_orani < 6) {
+            UVAdet += 4;
+            UVCumle[1] = "Ortalama UV orani|Az riskli";
+            UVCumle[2] = "Gunese saatlerce|maruz kalmamasi";
+            UVCumle[3] = "Disinda|zararsiz";
+            UVCumle[4] = "Onerilenler;|Gunes Gozlugu";
+          } else if (UV_orani < 8) {
+            UVAdet += 5;
+            UVCumle[1] = "Yuksek UV orani| ";
+            UVCumle[2] = "Gunes ile uzun|sureli temas";
+            UVCumle[3] = "halinde goz|ve cilt zarar";
+            UVCumle[4] = "Gorebilir|Onerilenler;";
+            UVCumle[5] = "Gunes Korumali|Gozluk, Kiyafet";
 
-        } else if (UV_orani < 11) {
-          UVAdet += 4;
-          UVCumle[1] = "Cok Riskli|Yuksek UV orani";
-          UVCumle[2] = "Gunes ile kisa |sureli dahi";
-          UVCumle[3] = "temas edilirse|gozde ve deride";
-          UVCumle[4] = "ciddi hasarlar|olusabilir";
-        } else if (UV_orani >= 11) {
-          UVAdet += 5;
-          UVCumle[1] = "Dikkat!|Asiri riskli UV";
-          UVCumle[2] = "Gunes ile temas |dakikalar icinde";
-          UVCumle[3] = "gozu ve deriyi|yakar!";
-          UVCumle[4] = "Onerilenler|Evden cikmayin";
-          UVCumle[5] = "Kapali alanda|kalin";
+          } else if (UV_orani < 11) {
+            UVAdet += 4;
+            UVCumle[1] = "Cok Riskli|Yuksek UV orani";
+            UVCumle[2] = "Gunes ile kisa |sureli dahi";
+            UVCumle[3] = "temas edilirse|gozde ve deride";
+            UVCumle[4] = "ciddi hasarlar|olusabilir";
+          } else if (UV_orani >= 11) {
+            UVAdet += 5;
+            UVCumle[1] = "Dikkat!|Asiri riskli UV";
+            UVCumle[2] = "Gunes ile temas |dakikalar icinde";
+            UVCumle[3] = "gozu ve deriyi|yakar!";
+            UVCumle[4] = "Onerilenler|Evden cikmayin";
+            UVCumle[5] = "Kapali alanda|kalin";
 
-        } else
+          } else
 
-          break;
+            break;
+        }
       }
     }
   }
@@ -419,7 +425,7 @@ void ortamVeriGuncelle()
 
   if (internet && sicaklik < (hava_derecesi - 9))
   {
-    sicaklikAdet=9;
+    sicaklikAdet = 9;
     sicaklikCumle[1] = "ic dis sicaklik|farki yuksek";
     sicaklikCumle[2] = "Düşük derece klima|kullanımından";
     sicaklikCumle[3] = "gelebilecek zarar|listesi;";
@@ -428,9 +434,9 @@ void ortamVeriGuncelle()
     sicaklikCumle[6] = "Klimalarda her|derece farki";
     sicaklikCumle[7] = "artisi, %10 |fazla enerji";
     sicaklikCumle[8] = "gideri olarak |yansir";
-  }else if(internet && hava_derecesi >21 && sicaklik<21)
+  } else if (internet && hava_derecesi > 21 && sicaklik < 21)
   {
-    sicaklikAdet=10;
+    sicaklikAdet = 10;
     sicaklikCumle[1] = "klima cok dusuk |derecelerde";
     sicaklikCumle[2] = "Bu durum kas|tutulmasi ve";
     sicaklikCumle[3] = "soguk alginligi|gibi sorunlara";
@@ -440,24 +446,48 @@ void ortamVeriGuncelle()
     sicaklikCumle[7] = "Klimalarda her|derece farki";
     sicaklikCumle[8] = "artisi, %10 |fazla enerji";
     sicaklikCumle[9] = "gideri olarak |yansir";
-    
-  }else if(internet && hava_derecesi <18 && sicaklik>24)
+
+  } else if (internet && hava_derecesi < 18 && sicaklik > 24)
   {
-    sicaklikAdet=4;
+    sicaklikAdet = 4;
     sicaklikCumle[1] = "isitici yuksek |derecelerde";
     sicaklikCumle[2] = "bu durum yuksek|enerji giderleri";
     sicaklikCumle[3] = "olusturabilir|";
+
+  }
+  if (nem<30) {
+    nemAdet = 9;
+    nemCumle[1] = "Hava fazla kuru|dusuk nemin";
+    nemCumle[2] = "neden oldugu|zararlar";
+    nemCumle[3] = "Bogaz kurulugu,|Gozlerde yanma";
+    nemCumle[4] = "Havadaki nem|oranini";
+    nemCumle[5] = "arttirmak icin|yapilabilecekler:";
+    nemCumle[6] = "Ortami|havalandirmak";
+    nemCumle[7] = "Nem arttirici|cihazlar";
+    nemCumle[8] = "kullanmak ise|yarayacaktir";
     
   }
-  
+  if (nem>60) {
+    nemAdet = 9;
+    nemCumle[1] = "Hava fazla nemli|nem oraninin";
+    nemCumle[2] = "verebilecegi|zararlar";
+    nemCumle[3] = "Bunalticilik|hissi";
+    nemCumle[4] = "Uyku hali|yaratabilir";
+    nemCumle[5] = "azaltmak icin|yapilabilecekler:";       
+    nemCumle[6] = "Ortami|havalandirmak";
+    nemCumle[7] = "Klimalarin|nem alma modunu";
+    nemCumle[8] = "calistirmak ise|yarayacaktir";
+  }
 
 
-  // && sicaklik<21
 
-  Serial.println(" get PPM : " + String(gasSensor.getPPM()));
-  Serial.println(" get corrected PPM : " + String(gasSensor.getCorrectedPPM(sicaklik, nem)));
-  Serial.println(" A0 : " + String(a0read));
-  Serial.println(" get resistance : " + String(havaResist));
+
+      // && sicaklik<21
+
+      Serial.println(" get PPM : " + String(gasSensor.getPPM()));
+      Serial.println(" get corrected PPM : " + String(gasSensor.getCorrectedPPM(sicaklik, nem)));
+      Serial.println(" A0 : " + String(a0read));
+      Serial.println(" get resistance : " + String(havaResist));
 
 }
 
@@ -465,17 +495,21 @@ void ekran_tazele()
 {
   if (mod == 0)
   {
-    lcdPrint("Oda "+String(int(sicaklik)) + "C Nem %" + String(int(nem)), hava_durumu + " " + String(hava_derecesi) + "C");
+    lcdPrint("Oda " + String(int(sicaklik)) + "C Nem %" + String(int(nem)), hava_durumu + " " + String(hava_derecesi) + "C");
   } else if (mod == 1)
   {
-    sicaklikCumle[0] = "Ortam Sicaklik|"+String(int(sicaklik)) + "C";
-    
+    sicaklikCumle[0] = "Ortam Sicaklik|" + String(int(sicaklik)) + "C";
+
     lcdPrint("Ortam Sicaklik" , String(int(sicaklik)) + "C");
     if (yazi_durum == 0 && pressed == 0) aciklama(sicaklikCumle, sicaklikAdet);
-    
+
   } else if (mod == 2)
   {
     lcdPrint("Nem %" + String(int(nem)));
+     nemCumle[0] = "Nem %" + String(int(nem)) + "|";
+
+    
+    if (yazi_durum == 0 && pressed == 0) aciklama(nemCumle, nemAdet);
   } else if (mod == 3)
   {
     lcdPrint("Ortam Hava", "Kalitesi " + String(havaCPPM));
@@ -531,13 +565,12 @@ void loop()
   } else pressed = 0;
   delay(100);
 
-  if (internet)
-    if (millis() - lastTime > 100000)
-    {
-      havaDurumu();
-      UVDurumu();
-      lastTime = millis();
-    };
+  if (millis() - lastTime > 100000)
+  {
+    havaDurumu();
+    UVDurumu();
+    lastTime = millis();
+  };
   if (millis() - ortamTimer > 5000)
   {
     ortamTimer = millis();
