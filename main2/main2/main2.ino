@@ -489,7 +489,7 @@ void ortamVeriGuncelle()
     havaKaliteCumle[2] = "ama daha cok|havalandirma";
     havaKaliteCumle[3] = "yaparak|saglikli bir";
     havaKaliteCumle[4] = "hava degeri elde|edebilirsiniz";
-  }else if(a0read>300)
+  }else if(a0read<501)
   {
     havaKaliteAdet = 6;
     havaKaliteCumle[1] = "Ortam havasiz.|Sigara, ";
