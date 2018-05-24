@@ -13,14 +13,14 @@ MQ135 gasSensor = MQ135(A0);
 const int button1Pin = D10;
 const int button2Pin = D11;
 
-const char* ssid     = "Alihan";
-const char* password = "12345678";
+//const char* ssid     = "Alihan";
+//const char* password = "12345678";
 
 //const char* ssid     = "paradox35";
 //const char* password = "SimonSchama35";
 
-//const char* ssid     = "MAVISEHIR_BILIM_LOBI_2";
-//const char* password = "Doga204060!";
+const char* ssid     = "MAVISEHIR_BILIM_LOBI_2";
+const char* password = "Doga204060";
 
 //const char* ssid     = "ilkeriphone";
 //const char* password = "12345679";
@@ -122,12 +122,12 @@ void setup() {
     lcdPrint("Connecting to ", String(mt));
     delay(500);
     tryadd++;
-    if (tryadd > 8)
+    if (tryadd > 12)
       break;
     mt = (String)mt + String(".");
 
   }
-  if (tryadd < 9)
+  if (tryadd < 13)
   {
     internet = 1;
     lcdPrint("Connected ", String(ssid));
@@ -164,12 +164,11 @@ void havaDurumu()
 
       delay(500);
       tryadd++;
-      if (tryadd > 8)
+      if (tryadd > 12)
         break;
       mt = (String)mt + String(".");
-
     }
-    if (tryadd < 9)
+    if (tryadd < 13)
     {
       internet = 1;
     }
@@ -251,12 +250,12 @@ void UVDurumu()
 
       delay(500);
       tryadd++;
-      if (tryadd > 8)
+      if (tryadd > 12)
         break;
       mt = (String)mt + String(".");
 
     }
-    if (tryadd < 9)
+    if (tryadd < 13)
     {
       internet = 1;
     }
@@ -415,7 +414,7 @@ void ortamVeriGuncelle()
   havaResist = gasSensor.getResistance();
   havaPPM = gasSensor.getPPM();
   havaCPPM = gasSensor.getCorrectedPPM(sicaklik, nem);
-  if (a0read > 400) {
+  if (a0read > 450) {
     mod = 99;
   } else if (mod == 99)
   {
@@ -479,15 +478,40 @@ void ortamVeriGuncelle()
     nemCumle[8] = "calistirmak ise|yarayacaktir";
   }
 
+  if(a0read<200)
+  {
+    havaKaliteAdet = 2;
+    havaKaliteCumle[1] = "Ortam havasi|Uygun degerde";
+  }else if(a0read<301)
+  {
+    havaKaliteAdet = 5;
+    havaKaliteCumle[1] = "Hava kalitesi|istenilen aralikta";
+    havaKaliteCumle[2] = "ama daha cok|havalandirma";
+    havaKaliteCumle[3] = "yaparak|saglikli bir";
+    havaKaliteCumle[4] = "hava degeri elde|edebilirsiniz";
+  }else if(a0read>300)
+  {
+    havaKaliteAdet = 6;
+    havaKaliteCumle[1] = "Ortam havasiz.|Sigara, ";
+    havaKaliteCumle[2] = "duman yada|acik kalan ";
+    havaKaliteCumle[3] = "bir gaz kaynagi|olabilir. ";
+    havaKaliteCumle[4] = "Daha rahat bir|hava icin ";
+    havaKaliteCumle[5] = "ortami|havalandiriniz ";
+  }else if(a0read>500)
+  {
+    havaKaliteAdet = 6;
+    havaKaliteCumle[1] = "Hava kalitesi|tehlikeli ";
+    havaKaliteCumle[2] = "degerlerde.| Odayi ";
+    havaKaliteCumle[3] = "havalandirmali|yada ayni ortamda ";
+    havaKaliteCumle[4] = "uzun sure|kalmamalisiniz";
+  }
+  
+  // && sicaklik<21
 
-
-
-      // && sicaklik<21
-
-      Serial.println(" get PPM : " + String(gasSensor.getPPM()));
-      Serial.println(" get corrected PPM : " + String(gasSensor.getCorrectedPPM(sicaklik, nem)));
-      Serial.println(" A0 : " + String(a0read));
-      Serial.println(" get resistance : " + String(havaResist));
+  Serial.println(" get PPM : " + String(gasSensor.getPPM()));
+  Serial.println(" get corrected PPM : " + String(gasSensor.getCorrectedPPM(sicaklik, nem)));
+  Serial.println(" A0 : " + String(a0read));
+  Serial.println(" get resistance : " + String(havaResist));
 
 }
 
@@ -506,13 +530,13 @@ void ekran_tazele()
   } else if (mod == 2)
   {
     lcdPrint("Nem %" + String(int(nem)));
-     nemCumle[0] = "Nem %" + String(int(nem)) + "|";
-
-    
+    nemCumle[0] = "Nem %" + String(int(nem)) + "|";
     if (yazi_durum == 0 && pressed == 0) aciklama(nemCumle, nemAdet);
   } else if (mod == 3)
   {
     lcdPrint("Ortam Hava", "Kalitesi " + String(havaCPPM));
+    nemCumle[0] = "Ortam Hava|Kalitesi " + String(havaCPPM)+"|";
+    if (yazi_durum == 0 && pressed == 0) aciklama(havaKaliteCumle, havaKaliteAdet);
   } else if (mod == 4)
   {
     lcdPrint("Hava Durumu ", hava_durumu + " " + String(hava_derecesi) + "C");
