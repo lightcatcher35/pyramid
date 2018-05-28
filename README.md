@@ -1,7 +1,15 @@
-# pyramid
+# Pyramid V1.0
 
 
-<h1>Akıllı ev arduino projesi</h1>
+<h1>Akıllı ev asistanı projesi</h1>
+<h3>Bu IOT projesinde evdeki ısı, nem, hava kalitesi gibi ölçüp, bu bilgilerle beraber web servisinden alınan hava durumu ve güneş UV derecelerini alıp akıllı karşılaştırmalar yaparak sağlık, izolasyon ve enerji giderleri ile ilgili yorumlar yapan bir IOT cihazı oluşturulması amaçlanmıştır.</h3>
+<br>
+<h2> Özellik ve Donanımlar</h2>
+<p>Cihaz içinde Arduino Wemos D1 board, DHT11 ve MQ135 sensör, potansiyometre, tact butonlar ve 16x2 ldr ekran kullanılmıştır. </p>
+<p>Cihazın tasarımı Tinkercad programı ile 3d boyutlu olarak hazırlanarak 3d yazıcıdan çıktı alınarak oluşturulmuştur.</p>
+<p>logo tasarımları açık kaynak fontawesome kullanılarak hazırlanmıştır.</p>
+
+
 
 <b>nem & sıcaklık</b>
 
