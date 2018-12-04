@@ -36,6 +36,10 @@ const char* host = "api.openweathermap.org";
 #define FIREBASE_HOST "pyramid-19329.firebaseio.com"
 #define FIREBASE_AUTH "j1yT07XvjNGpTOll8eAGcOoWWJV963myKXhn1xHy"
 
+
+StaticJsonBuffer<200> jsonBuffer;
+dht11 DHT11;
+
 float sicaklik, nem = 0;
 
 float a0read = 0;
@@ -76,10 +80,11 @@ int havaAdet = 0;
 String UVCumle[20];
 int UVAdet = 0;
 
+
+JsonObject& root = jsonBuffer.createObject();
+
 int yazi_durum = 0;
 
-StaticJsonBuffer<200> jsonBuffer;
-dht11 DHT11;
 
 
 void lcdClear()
@@ -587,13 +592,13 @@ void ekran_tazele()
 void firebaseUpdate()
 {
   
-  JsonObject& root = jsonBuffer.createObject();
   root["nem"] = nem;
   root["sicaklik"] = sicaklik;
   root["hava_kalitesi"] = a0read;
   root["hava_derecesi"] = int(hava_derecesi);
   root["uv_isini"] = UV_orani;
-  Serial.println("Yazılıyor...");  
+  Serial.println("Yazılıyor...");
+  //Serial.println(root["nem"]); 
  // Serial.println(root);  
   
   String name = Firebase.push("logs", root);
