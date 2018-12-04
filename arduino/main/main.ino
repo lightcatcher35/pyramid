@@ -536,10 +536,10 @@ void ortamVeriGuncelle()
   
   // && sicaklik<21
 
-  Serial.println(" get PPM : " + String(gasSensor.getPPM()));
-  Serial.println(" get corrected PPM : " + String(gasSensor.getCorrectedPPM(sicaklik, nem)));
-  Serial.println(" A0 : " + String(a0read));
-  Serial.println(" get resistance : " + String(havaResist));
+  //Serial.println(" get PPM : " + String(gasSensor.getPPM()));
+  //Serial.println(" get corrected PPM : " + String(gasSensor.getCorrectedPPM(sicaklik, nem)));
+  //Serial.println(" A0 : " + String(a0read));
+  //Serial.println(" get resistance : " + String(havaResist));
 
 }
 
