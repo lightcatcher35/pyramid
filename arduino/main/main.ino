@@ -429,12 +429,6 @@ void ortamVeriGuncelle()
 {
   int chk = DHT11.read(DHT11PIN);
 
-  //  Serial.print("Nem (%): ");
-  //  Serial.println((float)DHT11.humidity, 2);
-  //
-  //  Serial.print("Sicaklik (Celcius): ");
-  //  Serial.println((float)DHT11.temperature, 2);
-
   sicaklik = DHT11.temperature;
   nem = DHT11.humidity;
 
@@ -643,7 +637,7 @@ void loop()
 
 
   //if (millis() - updateTimer > 3600000)
-  if (millis() - updateTimer > 10000)
+  if (millis() - updateTimer > 300000)
   {
     firebaseUpdate();
     updateTimer = millis();
