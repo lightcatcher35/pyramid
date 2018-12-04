@@ -438,7 +438,7 @@ void ortamVeriGuncelle()
   sicaklik = DHT11.temperature;
   nem = DHT11.humidity;
 
-  int a0read = analogRead(A0);
+  a0read = analogRead(A0);
   havaResist = gasSensor.getResistance();
   havaPPM = gasSensor.getPPM();
   havaCPPM = gasSensor.getCorrectedPPM(sicaklik, nem);
@@ -647,9 +647,7 @@ void loop()
   {
     firebaseUpdate();
     updateTimer = millis();
-  };
-
-  
+  };  
 
   if (millis() - lastTime > 100000)
   {
