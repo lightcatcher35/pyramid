@@ -1,4 +1,6 @@
 #include <ESP8266WiFi.h>
+
+#include <FirebaseArduino.h>
 #include <ArduinoJson.h>
 #include <dht11.h> // dht11 kütüphanesini ekliyoruz.
 #include "MQ135.h"
@@ -19,17 +21,20 @@ const int button2Pin = D11;
 //const char* ssid     = "paradox35";
 //const char* password = "SimonSchama35";
 
-const char* ssid     = "MAVISEHIR_BILIM_LOBI_2";
-const char* password = "Doga204060";
+//const char* ssid     = "MAVISEHIR_BILIM_LOBI_2";
+//const char* password = "Doga204060";
 
 //const char* ssid     = "ilkeriphone";
 //const char* password = "12345679";
 
 
-//const char* ssid     = "BilisimLab";
-//const char* password = "bilisim34@!";
+const char* ssid     = "BilisimLab";
+const char* password = "bilisim@34!";
 
 const char* host = "api.openweathermap.org";
+
+#define FIREBASE_HOST "pyramid-19329.firebaseio.com"
+#define FIREBASE_AUTH "j1yT07XvjNGpTOll8eAGcOoWWJV963myKXhn1xHy"
 
 float sicaklik, nem = 0;
 
@@ -45,11 +50,13 @@ float UV_orani = 0;
 
 float hava_kirliligi;
 
-int internet = 0;
+int internet,n = 0;
 
 double lastTime = 0;
 double ekranTimer = 0;
 double ortamTimer = 0;
+
+double updateTimer = 0;
 
 int mod = 0;
 int pressed = 0;
@@ -129,7 +136,10 @@ void setup() {
   }
   if (tryadd < 13)
   {
+    
     internet = 1;
+    
+    Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
     lcdPrint("Connected ", String(ssid));
     delay(1500);
 
@@ -139,6 +149,7 @@ void setup() {
     delay(1500);
     UVDurumu();
     lcdPrint("UV Orani ", "guncellendi");
+    
   } else
   {
     UVCumle[0] = "UV Oranina|Ulasilamiyor";
@@ -216,7 +227,10 @@ void havaDurumu()
         JsonObject& root1 = jsonBuffer.parseObject(satir);
         if (root1.success())
         {
+          
           String havaDurumuEn = root1["weather"][0]["main"];
+          
+          Serial.println(havaDurumuEn);
           float havaDerecesi = root1["main"]["temp"];
 
 
@@ -225,6 +239,15 @@ void havaDurumu()
           if (havaDurumuEn == "Clouds")
           {
             hava_durumu = "Bulutlu";
+          } else if (havaDurumuEn == "Rain")
+          {
+            hava_durumu = "Yagmurlu";
+          } else if (havaDurumuEn == "Mist")
+          {
+            hava_durumu = "Sisli";
+          }  else if (havaDurumuEn == "Haze")
+          {
+            hava_durumu = "Puslu";
           } else if (havaDurumuEn == "Clear")
           {
             hava_durumu = "Hava Acik";
@@ -519,7 +542,7 @@ void ekran_tazele()
 {
   if (mod == 0)
   {
-    lcdPrint("Oda " + String(int(sicaklik)) + "C Nem %" + String(int(nem)), hava_durumu + " " + String(hava_derecesi) + "C");
+    lcdPrint("Oda " + String(int(sicaklik)) + "C Nem %" + String(int(nem)), hava_durumu + " " + String(int(hava_derecesi)) + "C");
   } else if (mod == 1)
   {
     sicaklikCumle[0] = "Ortam Sicaklik|" + String(int(sicaklik)) + "C";
@@ -539,7 +562,7 @@ void ekran_tazele()
     if (yazi_durum == 0 && pressed == 0) aciklama(havaKaliteCumle, havaKaliteAdet);
   } else if (mod == 4)
   {
-    lcdPrint("Hava Durumu ", hava_durumu + " " + String(hava_derecesi) + "C");
+    lcdPrint("Hava Durumu ", hava_durumu + " " + String(int(hava_derecesi)) + "C");
   } else if (mod == 5)
   {
     UVCumle[0] = "izmir gunes|UV Orani " + String(UV_orani);
@@ -559,6 +582,28 @@ void ekran_tazele()
   }
 
 
+}
+
+void firebaseUpdate()
+{
+  
+  JsonObject& root = jsonBuffer.createObject();
+  root["nem"] = nem;
+  root["sicaklik"] = sicaklik;
+  root["hava_kalitesi"] = a0read;
+  root["hava_derecesi"] = int(hava_derecesi);
+  root["uv_isini"] = UV_orani;
+  
+  String name = Firebase.push("logs", root);
+  // handle error
+  if (Firebase.failed()) {
+      Serial.print("pushing /logs failed:");
+      Serial.println(Firebase.error());  
+      return;
+  }
+  Serial.print("pushed: /logs/");
+  Serial.println(name);
+  
 }
 void loop()
 {
@@ -589,12 +634,23 @@ void loop()
   } else pressed = 0;
   delay(100);
 
+
+  //if (millis() - updateTimer > 3600000)
+  if (millis() - updateTimer > 10000)
+  {
+    firebaseUpdate();
+    updateTimer = millis();
+  };
+
+  
+
   if (millis() - lastTime > 100000)
   {
     havaDurumu();
     UVDurumu();
     lastTime = millis();
   };
+  
   if (millis() - ortamTimer > 5000)
   {
     ortamTimer = millis();
