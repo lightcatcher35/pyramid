@@ -593,6 +593,8 @@ void firebaseUpdate()
   root["hava_kalitesi"] = a0read;
   root["hava_derecesi"] = int(hava_derecesi);
   root["uv_isini"] = UV_orani;
+  Serial.println("Yazılıyor...");  
+ // Serial.println(root);  
   
   String name = Firebase.push("logs", root);
   // handle error
