@@ -321,7 +321,7 @@ void UVDurumu()
 
     while (client.available()) {
       String line = client.readStringUntil('\n');
-      Serial.println(line);
+      //Serial.println(line);
       if (line.indexOf("date_iso") > 0)
       {
         String satir = line;
@@ -591,7 +591,7 @@ void firebaseUpdate()
   root["hava_kalitesi"] = a0read;
   root["hava_derecesi"] = int(hava_derecesi);
   root["uv_isini"] = UV_orani;
-  Serial.println("Yazılıyor...");
+  //Serial.println("Yazılıyor...");
   //Serial.println(root["nem"]); 
  // Serial.println(root);  
   
@@ -602,8 +602,8 @@ void firebaseUpdate()
       Serial.println(Firebase.error());  
       return;
   }
-  Serial.print("pushed: /logs/");
-  Serial.println(name);
+  //Serial.print("pushed: /logs/");
+  //Serial.println(name);
   
 }
 void loop()
@@ -637,7 +637,7 @@ void loop()
 
 
   //if (millis() - updateTimer > 3600000)
-  if (millis() - updateTimer > 300000)
+  if (millis() - updateTimer > 200000)
   {
     firebaseUpdate();
     updateTimer = millis();
