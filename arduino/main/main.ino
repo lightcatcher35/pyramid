@@ -1,5 +1,8 @@
-#include <ESP8266WiFi.h>
+#include <time.h>
+#include <stdio.h>
+#include <string.h>
 
+#include <ESP8266WiFi.h>
 #include <FirebaseArduino.h>
 #include <ArduinoJson.h>
 #include <dht11.h> // dht11 kütüphanesini ekliyoruz.
@@ -163,7 +166,29 @@ void setup() {
   }
 
   ortamVeriGuncelle();
+
+  
+  configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+  Serial.println("\nWaiting for time");
+  while (!time(nullptr)) {
+    Serial.print(".");
+    delay(1000);
+  }
+  Serial.println("");
   //lcdClear();
+
+  time_t now = time(nullptr);
+  Serial.println(ctime(&now));
+
+  char* ptr = strtok(ctime(&now), " ");
+  if(ptr != 0)
+  {
+    
+    Serial.println(ptr[0]);
+  }
+  
+  Serial.println(ptr);
+
 
 }
 
@@ -608,6 +633,9 @@ void firebaseUpdate()
 }
 void loop()
 {
+
+
+  
   int buttonState1 = digitalRead(button1Pin);
   int buttonState2 = digitalRead(button2Pin);
   //Serial.println(" buton 1 " + String(buttonState1) + " | buton 2 " + String(buttonState2));
