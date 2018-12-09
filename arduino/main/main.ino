@@ -22,7 +22,8 @@ const int button2Pin = D11;
 //const char* password = "12345678";
 
 //const char* ssid     = "paradox35";
-//const char* password = "SimonSchama35";
+const char* ssid     = "paradox35";
+const char* password = "SimonSchama35";
 
 //const char* ssid     = "MAVISEHIR_BILIM_LOBI_2";
 //const char* password = "Doga204060";
@@ -31,8 +32,8 @@ const int button2Pin = D11;
 //const char* password = "12345679";
 
 
-const char* ssid     = "BilisimLab";
-const char* password = "bilisim@34!";
+//const char* ssid     = "BilisimLab";
+//const char* password = "bilisim@34!";
 
 const char* host = "api.openweathermap.org";
 
@@ -64,6 +65,7 @@ double ekranTimer = 0;
 double ortamTimer = 0;
 
 double updateTimer = 0;
+double updateHalfTimer = 0;
 
 int mod = 0;
 int pressed = 0;
@@ -83,6 +85,11 @@ int havaAdet = 0;
 String UVCumle[20];
 int UVAdet = 0;
 
+String saat="";
+String tarih="";
+String gun="";
+String ay="";
+String yil="";
 
 JsonObject& root = jsonBuffer.createObject();
 
@@ -105,7 +112,22 @@ void lcdPrint(String text1, String text2 = "                 ")
   lcd.setCursor(0, 1);
   lcd.print(String(text2));
 }
+String getValue(String data, char separator, int index)
+{
+  int found = 0;
+  int strIndex[] = {0, -1};
+  int maxIndex = data.length()-1;
 
+  for(int i=0; i<=maxIndex && found<=index; i++){
+    if(data.charAt(i)==separator || i==maxIndex){
+        found++;
+        strIndex[0] = strIndex[1]+1;
+        strIndex[1] = (i == maxIndex) ? i+1 : i;
+    }
+  }
+
+  return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
 void setup() {
   Serial.begin(115200);
   lcd.begin(16, 2);
@@ -133,13 +155,14 @@ void setup() {
   String mt = ".";
   int tryadd = 0;
   while (WiFi.status() != WL_CONNECTED) {
-
+    Serial.print(mt);
     lcdPrint("Connecting to ", String(mt));
     delay(500);
     tryadd++;
     if (tryadd > 12)
       break;
     mt = (String)mt + String(".");
+    
 
   }
   if (tryadd < 13)
@@ -168,7 +191,7 @@ void setup() {
   ortamVeriGuncelle();
 
   
-  configTime(3 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+  configTime(3 * 3600, 0, "tr.pool.ntp.org", "time.nist.gov");
   Serial.println("\nWaiting for time");
   while (!time(nullptr)) {
     Serial.print(".");
@@ -178,18 +201,88 @@ void setup() {
   //lcdClear();
 
   time_t now = time(nullptr);
-  Serial.println(ctime(&now));
 
-  char* ptr = strtok(ctime(&now), " ");
-  if(ptr != 0)
+  String part01 = getValue(String(ctime(&now)),' ',0);
+  String part02 = getValue(String(ctime(&now)),' ',1);
+  String part03 = getValue(String(ctime(&now)),' ',2);
+  String part04 = getValue(String(ctime(&now)),' ',3);
+  String part05 = getValue(String(ctime(&now)),' ',4);
+  yil = getValue(String(ctime(&now)),' ',5);
+  ay=ayVeri(part02);
+  Serial.println(yil);
+  Serial.println(ay);
+  /*
+  Serial.println(part01);
+  Serial.println(part02);
+  Serial.println(part03);
+  Serial.println(part04);
+  Serial.println(part05);
+  Serial.println(part06);
+  */
+
+}
+String ayVeri(String ay)
+{
+  if(ay=="Jan")
   {
-    
-    Serial.println(ptr[0]);
+    return "Ock";
+  }else if(ay=="Feb")
+  {
+    return "Şub";
+  }else if(ay=="Mar")
+  {
+    return "Mrt";
+  }else if(ay=="Apr")
+  {
+    return "Nis";
+  }else if(ay=="May")
+  {
+    return "May";
+  }else if(ay=="Jun")
+  {
+    return "Haz";
+  }else if(ay=="Jul")
+  {
+    return "Tem";
+  }else if(ay=="Aug")
+  {
+    return "Ağs";
+  }else if(ay=="Sep")
+  {
+    return "Eyl";
+  }else if(ay=="Oct")
+  {
+    return "Ekm";
+  }else if(ay=="Nov")
+  {
+    return "Kas";
+  }else if(ay=="Dec")
+  {
+    return "Ara";
+  }else 
+  {
+    return ay;
   }
+}
+void zamaniGuncelle()
+{
+  time_t now = time(nullptr);
+
+  String part01 = getValue(String(ctime(&now)),' ',0);
+  String part02 = getValue(String(ctime(&now)),' ',1);
+  String part03 = getValue(String(ctime(&now)),' ',2);
+  String part04 = getValue(String(ctime(&now)),' ',3);
+  String part05 = getValue(String(ctime(&now)),' ',4);
+  String part06 = getValue(String(ctime(&now)),' ',5);
   
-  Serial.println(ptr);
+  yil = getValue(String(ctime(&now)),' ',5);
+  ay=ayVeri(part02);
+  tarih =String(part04+" "+ay+" "+yil);
+  saat =part05;
 
-
+  Serial.println(tarih);
+  Serial.println(saat);
+  
 }
 
 void havaDurumu()
@@ -218,6 +311,8 @@ void havaDurumu()
   {
 
     Serial.println(host);
+    
+    Serial.println("hava durumu için servise bağlanılıyor");
 
     // Use WiFiClient class to create TCP connections
     WiFiClient client;
@@ -237,8 +332,8 @@ void havaDurumu()
                  "Connection: close\r\n\r\n");
     unsigned long timeout = millis();
     while (client.available() == 0) {
-      if (millis() - timeout > 5000) {
-        //Serial.println(">>> Client Timeout !");
+      if (millis() - timeout > 7000) {
+        Serial.println(">>> Client Timeout !");
         client.stop();
         return;
       }
@@ -248,15 +343,18 @@ void havaDurumu()
       String line = client.readStringUntil('\n');
       if (line.indexOf("coord") > 0)
       {
+        
 
 
         String satir = line;
-        //Serial.println(satir);
+        Serial.println(satir);
 
         StaticJsonBuffer<1000> jsonBuffer;
         JsonObject& root1 = jsonBuffer.parseObject(satir);
         if (root1.success())
         {
+          
+          Serial.println("hava durumu alındı.");
           
           String havaDurumuEn = root1["weather"][0]["main"];
           
@@ -283,6 +381,10 @@ void havaDurumu()
             hava_durumu = "Hava Acik";
           } else hava_durumu = havaDurumuEn;
           break;
+        }else
+        {
+          
+          Serial.println(">>> Client Timeout !");
         }
       }
     }
@@ -346,7 +448,7 @@ void UVDurumu()
 
     while (client.available()) {
       String line = client.readStringUntil('\n');
-      //Serial.println(line);
+      Serial.println(line);
       if (line.indexOf("date_iso") > 0)
       {
         String satir = line;
@@ -354,8 +456,9 @@ void UVDurumu()
         StaticJsonBuffer<1000> jsonBuffer;
         JsonObject& root1 = jsonBuffer.parseObject(satir);
         if (root1.success())
+        { 
+          Serial.println("UV Parse Edildi");
           UVAdet = 1;
-        {
           UV_orani = root1["value"];
           if (UV_orani < 4)
           {
@@ -607,7 +710,31 @@ void ekran_tazele()
 
 
 }
-
+void firebaseHalfUpdate()
+{
+  
+  root["nem"] = nem;
+  root["sicaklik"] = sicaklik;
+  root["hava_kalitesi"] = a0read;
+  root["hava_derecesi"] = int(hava_derecesi);
+  root["uv_isini"] = UV_orani;
+  root["tarih"] = tarih;
+  root["saat"] = saat;
+  //Serial.println("Yazılıyor...");
+  //Serial.println(root["nem"]); 
+ // Serial.println(root);  
+  
+  String name = Firebase.push("Hourlogs", root);
+  // handle error
+  if (Firebase.failed()) {
+      Serial.print("pushing /Hourlogs failed:");
+      Serial.println(Firebase.error());  
+      return;
+  }
+  //Serial.print("pushed: /logs/");
+  //Serial.println(name);
+  
+}
 void firebaseUpdate()
 {
   
@@ -616,6 +743,8 @@ void firebaseUpdate()
   root["hava_kalitesi"] = a0read;
   root["hava_derecesi"] = int(hava_derecesi);
   root["uv_isini"] = UV_orani;
+  root["tarih"] = tarih;
+  root["saat"] = saat;
   //Serial.println("Yazılıyor...");
   //Serial.println(root["nem"]); 
  // Serial.println(root);  
@@ -634,7 +763,7 @@ void firebaseUpdate()
 void loop()
 {
 
-
+  zamaniGuncelle();
   
   int buttonState1 = digitalRead(button1Pin);
   int buttonState2 = digitalRead(button2Pin);
@@ -665,11 +794,16 @@ void loop()
 
 
   //if (millis() - updateTimer > 3600000)
-  if (millis() - updateTimer > 200000)
+  if (millis() - updateTimer > 120000)
   {
     firebaseUpdate();
     updateTimer = millis();
-  };  
+  };
+  if (millis() - updateHalfTimer > 1800000)
+  {
+    firebaseHalfUpdate();
+    updateHalfTimer = millis();
+  };
 
   if (millis() - lastTime > 100000)
   {
@@ -689,4 +823,3 @@ void loop()
     ekran_tazele();
   }
 }
-
