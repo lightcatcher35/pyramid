@@ -21,7 +21,6 @@ const int button2Pin = D11;
 //const char* ssid     = "Alihan";
 //const char* password = "12345678";
 
-//const char* ssid     = "paradox35";
 const char* ssid     = "paradox35";
 const char* password = "SimonSchama35";
 
