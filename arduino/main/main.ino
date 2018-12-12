@@ -732,6 +732,14 @@ void firebaseUpdate()
   Serial.println("Firebase'e 4 dakikalık güncelleme yapılıyor");
   Serial.println("");
   Serial.println("");
+
+  
+  Firebase.setString("anlik/sonGuncelleme",String(saat+" "+tarih));
+  Firebase.setFloat("anlik/nem", nem);
+  Firebase.setFloat("anlik/sicaklik", sicaklik);
+  Firebase.setFloat("anlik/hava_kalitesi", a0read);
+  Firebase.setFloat("anlik/hava_derecesi", int(hava_derecesi));
+  Firebase.setFloat("anlik/uv_isini", UV_orani);
   
   String name = Firebase.push("logs", root);
   // handle error
