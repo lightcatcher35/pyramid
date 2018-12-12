@@ -1,7 +1,4 @@
 #include <time.h>
-#include <stdio.h>
-#include <string.h>
-
 #include <ESP8266WiFi.h>
 #include <FirebaseArduino.h>
 #include <ArduinoJson.h>
@@ -18,21 +15,14 @@ MQ135 gasSensor = MQ135(A0);
 const int button1Pin = D10;
 const int button2Pin = D11;
 
-//const char* ssid     = "Alihan";
-//const char* password = "12345678";
-
-const char* ssid     = "paradox35";
-const char* password = "SimonSchama35";
-
-//const char* ssid     = "MAVISEHIR_BILIM_LOBI_2";
-//const char* password = "Doga204060";
+//const char* ssid     = "paradox35";
+//const char* password = "SimonSchama35";
 
 //const char* ssid     = "ilkeriphone";
 //const char* password = "12345679";
 
-
-//const char* ssid     = "BilisimLab";
-//const char* password = "bilisim@34!";
+const char* ssid     = "BilisimLab";
+const char* password = "bilisim@34!";
 
 const char* host = "api.openweathermap.org";
 
@@ -40,7 +30,7 @@ const char* host = "api.openweathermap.org";
 #define FIREBASE_AUTH "j1yT07XvjNGpTOll8eAGcOoWWJV963myKXhn1xHy"
 
 
-StaticJsonBuffer<200> jsonBuffer;
+StaticJsonBuffer<250> jsonBuffer;
 dht11 DHT11;
 
 float sicaklik, nem = 0;
@@ -94,8 +84,6 @@ JsonObject& root = jsonBuffer.createObject();
 
 int yazi_durum = 0;
 
-
-
 void lcdClear()
 {
   lcd.setCursor(0, 0);
@@ -135,14 +123,11 @@ void setup() {
   pinMode(button1Pin, OUTPUT);
   pinMode(button2Pin, OUTPUT);
 
-
   lcd.print("Loading");
 
   // We start by connecting to a WiFi network
 
   Serial.println();
-  Serial.println();
-
   Serial.print("Connecting to ");
   Serial.println(ssid);
 
@@ -154,31 +139,34 @@ void setup() {
   String mt = ".";
   int tryadd = 0;
   while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(mt);
+    Serial.print(".");
     lcdPrint("Connecting to ", String(mt));
     delay(500);
     tryadd++;
     if (tryadd > 12)
       break;
     mt = (String)mt + String(".");
-    
-
   }
   if (tryadd < 13)
   {
-    
     internet = 1;
+    Serial.println("İnternete bağlandı.");
     
-    Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
-    lcdPrint("Connected ", String(ssid));
-    delay(1500);
-
-    lcdPrint("Web server'a ", "baglaniliyor");
+    Serial.println("Web server'a  baglaniliyor.");
+    Serial.println("Hava durumu alınıyor");
     havaDurumu();
     lcdPrint("Hava Durumu ", "guncellendi");
     delay(1500);
+    
+    Serial.println("UV alınıyor");
     UVDurumu();
-    lcdPrint("UV Orani ", "guncellendi");
+    lcdPrint("UV Orani ", "guncellendi");    
+    delay(1500);
+    
+    Serial.println("Firebase'e bağlanılıyor");
+    Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+    lcdPrint("Bulut Server'a", "Baglaniliyor");
+    delay(1500);
     
   } else
   {
@@ -191,34 +179,13 @@ void setup() {
 
   
   configTime(3 * 3600, 0, "tr.pool.ntp.org", "time.nist.gov");
-  Serial.println("\nWaiting for time");
+  Serial.println("Waiting for time");
   while (!time(nullptr)) {
     Serial.print(".");
     delay(1000);
   }
-  Serial.println("");
-  //lcdClear();
-
+  Serial.println("ok");
   time_t now = time(nullptr);
-
-  String part01 = getValue(String(ctime(&now)),' ',0);
-  String part02 = getValue(String(ctime(&now)),' ',1);
-  String part03 = getValue(String(ctime(&now)),' ',2);
-  String part04 = getValue(String(ctime(&now)),' ',3);
-  String part05 = getValue(String(ctime(&now)),' ',4);
-  yil = getValue(String(ctime(&now)),' ',5);
-  ay=ayVeri(part02);
-  Serial.println(yil);
-  Serial.println(ay);
-  /*
-  Serial.println(part01);
-  Serial.println(part02);
-  Serial.println(part03);
-  Serial.println(part04);
-  Serial.println(part05);
-  Serial.println(part06);
-  */
-
 }
 String ayVeri(String ay)
 {
@@ -267,6 +234,7 @@ void zamaniGuncelle()
 {
   time_t now = time(nullptr);
 
+  //Serial.println(ctime(&now));
   String part01 = getValue(String(ctime(&now)),' ',0);
   String part02 = getValue(String(ctime(&now)),' ',1);
   String part03 = getValue(String(ctime(&now)),' ',2);
@@ -276,11 +244,20 @@ void zamaniGuncelle()
   
   yil = getValue(String(ctime(&now)),' ',5);
   ay=ayVeri(part02);
-  tarih =String(part04+" "+ay+" "+yil);
-  saat =part05;
+  if(part03.length())
+  {
+    tarih =String(part03+" "+ay);
+    saat =part04;
+    
+  }else
+  {
+    tarih =String(part04+" "+ay);
+   saat =part05;
+  }
 
-  Serial.println(tarih);
-  Serial.println(saat);
+
+  //Serial.println(tarih);
+  //Serial.println(saat);
   
 }
 
@@ -309,7 +286,7 @@ void havaDurumu()
   if (internet == 1)
   {
 
-    Serial.println(host);
+    //Serial.println(host);
     
     Serial.println("hava durumu için servise bağlanılıyor");
 
@@ -346,7 +323,7 @@ void havaDurumu()
 
 
         String satir = line;
-        Serial.println(satir);
+        //Serial.println(satir);
 
         StaticJsonBuffer<1000> jsonBuffer;
         JsonObject& root1 = jsonBuffer.parseObject(satir);
@@ -357,7 +334,7 @@ void havaDurumu()
           
           String havaDurumuEn = root1["weather"][0]["main"];
           
-          Serial.println(havaDurumuEn);
+          //Serial.println(havaDurumuEn);
           float havaDerecesi = root1["main"]["temp"];
 
 
@@ -375,6 +352,9 @@ void havaDurumu()
           }  else if (havaDurumuEn == "Haze")
           {
             hava_durumu = "Puslu";
+          }  else if (havaDurumuEn == "Fog")
+          {
+            hava_durumu = "Sisli";
           } else if (havaDurumuEn == "Clear")
           {
             hava_durumu = "Hava Acik";
@@ -418,7 +398,7 @@ void UVDurumu()
   if (internet == 1)
   {
     //lcdPrint("Web server'a ", "baglaniliyor");
-    Serial.println(host);
+    //Serial.println(host);
 
     // Use WiFiClient class to create TCP connections
     WiFiClient client;
@@ -638,7 +618,7 @@ void ortamVeriGuncelle()
     havaKaliteCumle[2] = "ama daha cok|havalandirma";
     havaKaliteCumle[3] = "yaparak|saglikli bir";
     havaKaliteCumle[4] = "hava degeri elde|edebilirsiniz";
-  }else if(a0read<501)
+  }else if(a0read<600)
   {
     havaKaliteAdet = 6;
     havaKaliteCumle[1] = "Ortam havasiz.|Sigara, ";
@@ -646,7 +626,7 @@ void ortamVeriGuncelle()
     havaKaliteCumle[3] = "bir gaz kaynagi|olabilir. ";
     havaKaliteCumle[4] = "Daha rahat bir|hava icin ";
     havaKaliteCumle[5] = "ortami|havalandiriniz ";
-  }else if(a0read>500)
+  }else 
   {
     havaKaliteAdet = 6;
     havaKaliteCumle[1] = "Hava kalitesi|tehlikeli ";
@@ -719,11 +699,14 @@ void firebaseHalfUpdate()
   root["uv_isini"] = UV_orani;
   root["tarih"] = tarih;
   root["saat"] = saat;
-  //Serial.println("Yazılıyor...");
-  //Serial.println(root["nem"]); 
- // Serial.println(root);  
   
-  String name = Firebase.push("Hourlogs", root);
+  Serial.println("");
+  Serial.println("");
+  Serial.println("Firebase'e yarım saatlik güncelleme yapılıyor");
+  Serial.println("");
+  Serial.println("");
+  
+  String name = Firebase.push("halfHourLogs", root);
   // handle error
   if (Firebase.failed()) {
       Serial.print("pushing /Hourlogs failed:");
@@ -744,9 +727,11 @@ void firebaseUpdate()
   root["uv_isini"] = UV_orani;
   root["tarih"] = tarih;
   root["saat"] = saat;
-  //Serial.println("Yazılıyor...");
-  //Serial.println(root["nem"]); 
- // Serial.println(root);  
+  Serial.println("");
+  Serial.println("");
+  Serial.println("Firebase'e 4 dakikalık güncelleme yapılıyor");
+  Serial.println("");
+  Serial.println("");
   
   String name = Firebase.push("logs", root);
   // handle error
