@@ -691,22 +691,26 @@ void ekran_tazele()
 }
 void firebaseHalfUpdate()
 {
+
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& root4 = jsonBuffer.createObject();
   
-  root["nem"] = nem;
-  root["sicaklik"] = sicaklik;
-  root["hava_kalitesi"] = a0read;
-  root["hava_derecesi"] = int(hava_derecesi);
-  root["uv_isini"] = UV_orani;
-  root["tarih"] = tarih;
-  root["saat"] = saat;
+  root4["nem"] = nem;
+  root4["sicaklik"] = sicaklik;
+  root4["hava_kalitesi"] = a0read;
+  root4["hava_derecesi"] = int(hava_derecesi);
+  root4["uv_isini"] = UV_orani;
+  root4["tarih"] = tarih;
+  root4["saat"] = saat;
   
   Serial.println("");
   Serial.println("");
   Serial.println("Firebase'e yarım saatlik güncelleme yapılıyor");
-  Serial.println("");
-  Serial.println("");
+  Serial.println(saat);
+  Serial.println(tarih);
+  root4.printTo(Serial);
   
-  String name = Firebase.push("halfHourLogs", root);
+  String name = Firebase.push("halfHourLogs", root4);
   // handle error
   if (Firebase.failed()) {
       Serial.print("pushing /Hourlogs failed:");
@@ -719,29 +723,35 @@ void firebaseHalfUpdate()
 }
 void firebaseUpdate()
 {
+  StaticJsonBuffer<200> jsonBuffer;
+  JsonObject& object = jsonBuffer.createObject();
+
+  JsonObject& root3 = jsonBuffer.createObject();
+  object["hello"] = "world";
+  object.printTo(Serial);
   
-  root["nem"] = nem;
-  root["sicaklik"] = sicaklik;
-  root["hava_kalitesi"] = a0read;
-  root["hava_derecesi"] = int(hava_derecesi);
-  root["uv_isini"] = UV_orani;
-  root["tarih"] = tarih;
-  root["saat"] = saat;
+  root3["nem"] = nem;
+  root3["sicaklik"] = sicaklik;
+  root3["hava_kalitesi"] = a0read;
+  root3["hava_derecesi"] = int(hava_derecesi);
+  root3["uv_isini"] = UV_orani;
+  root3["tarih"] = tarih;
+  root3["saat"] = saat;
   Serial.println("");
   Serial.println("");
   Serial.println("Firebase'e 4 dakikalık güncelleme yapılıyor");
-  Serial.println("");
-  Serial.println("");
+  Serial.println(saat);
+  Serial.println(tarih);
+  root3.printTo(Serial);
 
   
-  Firebase.setString("anlik/sonGuncelleme",String(saat+" "+tarih));
+  Firebase.setString("anlik/tarih",tarih);
+  Firebase.setString("anlik/saat",saat);
   Firebase.setFloat("anlik/nem", nem);
   Firebase.setFloat("anlik/sicaklik", sicaklik);
   Firebase.setFloat("anlik/hava_kalitesi", a0read);
-  Firebase.setFloat("anlik/hava_derecesi", int(hava_derecesi));
-  Firebase.setFloat("anlik/uv_isini", UV_orani);
   
-  String name = Firebase.push("logs", root);
+  String name = Firebase.push("logs", root3);
   // handle error
   if (Firebase.failed()) {
       Serial.print("pushing /logs failed:");
