@@ -15,14 +15,14 @@ MQ135 gasSensor = MQ135(A0);
 const int button1Pin = D10;
 const int button2Pin = D11;
 
-//const char* ssid     = "paradox35";
-//const char* password = "SimonSchama35";
+const char* ssid     = "paradox35";
+const char* password = "SimonSchama35";
 
 //const char* ssid     = "ilkeriphone";
 //const char* password = "12345679";
 
-const char* ssid     = "BilisimLab";
-const char* password = "bilisim@34!";
+//const char* ssid     = "BilisimLab";
+//const char* password = "bilisim@34!";
 
 const char* host = "api.openweathermap.org";
 
@@ -618,7 +618,7 @@ void ortamVeriGuncelle()
     havaKaliteCumle[2] = "ama daha cok|havalandirma";
     havaKaliteCumle[3] = "yaparak|saglikli bir";
     havaKaliteCumle[4] = "hava degeri elde|edebilirsiniz";
-  }else if(a0read<600)
+  }else if(a0read<700)
   {
     havaKaliteAdet = 6;
     havaKaliteCumle[1] = "Ortam havasiz.|Sigara, ";
@@ -671,9 +671,9 @@ void ekran_tazele()
     lcdPrint("Hava Durumu ", hava_durumu + " " + String(int(hava_derecesi)) + "C");
   } else if (mod == 5)
   {
-    UVCumle[0] = "izmir gunes|UV Orani " + String(UV_orani);
+    UVCumle[0] = "Gunes isini|UV Orani " + String(UV_orani);
 
-    lcdPrint("izmir gunes", "UV Orani " + String(UV_orani));
+    lcdPrint("Gunes isini", "UV Orani " + String(UV_orani));
     if (yazi_durum == 0 && pressed == 0)
     {
       aciklama(UVCumle, UVAdet);
